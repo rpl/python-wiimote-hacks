@@ -1,0 +1,90 @@
+#!/usr/bin/python
+#
+# pywiimote-control: a tiny modular wiimote remote control application
+# Copyright (C) 2008  Luca Greco <rpl@salug.it>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+import cwiid
+import sys
+
+from modules import *
+
+optional_modules = [wiidummy, wiidesktop, wiimidi_guitar, wiimidi_drums] 
+optional_module_index = 0
+active_modules = [wiidummy]   
+
+def wiictrl_init (wiimote):
+    """ initialize wiimote and wiictrl modules """
+    for module in active_modules:
+        module.init()
+    wiimote.mesg_callback = wiictrl_callback
+    wiimote.rpt_mode = cwiid.RPT_BTN ^ cwiid.RPT_ACC ^cwiid.RPT_NUNCHUK
+    wiimote.led = cwiid.LED1_ON
+    wiimote.enable(cwiid.FLAG_MESG_IFC)
+    while 1:
+        pass
+
+def wiictrl_cycle_modules (wiimote):
+    """ """
+    global optional_module_index
+    old_cycle_module = optional_modules[optional_module_index]
+    active_modules.remove(old_cycle_module)
+    old_cycle_module.close()
+    optional_module_index = optional_module_index + 1
+
+    if optional_module_index == len(optional_modules):
+       optional_module_index = 0
+
+    new_cycle_module = optional_modules[optional_module_index]
+    new_cycle_module.init()
+    active_modules.append(new_cycle_module)
+
+    wiimote.led = { 
+        0: lambda n : cwiid.LED1_ON,
+        1: lambda n : cwiid.LED2_ON,
+        2: lambda n : cwiid.LED3_ON,
+        3: lambda n : cwiid.LED4_ON
+    }[optional_module_index](0)
+    
+
+def wiictrl_callback (mesg_list):
+    """ wiictrl general callback """
+    for mesg in mesg_list:
+        if mesg[0] == cwiid.MESG_BTN:
+            if mesg[1] == 0x80:
+               wiictrl_cycle_modules(wiimote) 
+        for module in active_modules:
+            module.callback(mesg)
+
+def wiictrl_close (wiimote):
+    """ close wiimote and wiictrl modules """
+    for module in modules_list:
+        module.close()
+    wiimote.close()
+
+
+while 1:
+    try:
+        print 'Put Wiimote in discoverable mode now (press 1+2)'
+        wiimote = cwiid.Wiimote()
+
+        wiictrl_init(wiimote)
+    except RuntimeError, inst:
+        pass
+    except KeyboardInterrupt: ### DON'T WORK
+        wiictrl_close(wiimote)
+        exit
+
+

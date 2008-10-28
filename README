@@ -1,0 +1,67 @@
+Python Wiimote Hacks
+====================
+
+This repository contains some little experiments with Nintendo Wiimote Remote Control
+on GNU/Linux.
+
+My first experiment is a tiny modular wiimote based remote control application:
+
+* pywiimote-control
+
+pywiimote-control
+-----------------
+
+This tiny python application, based on cwiid python bindings, is born to address some wminput's
+limitations :-(
+
+      wminput can't send complex key shortcuts (es. Ctrl-Alt-Left)
+
+Modules:
+
+* wmcompiz: send compiz dbus messages
+* wmsendkeys: send key shortcut with xtest api
+* wmdesktop: wmcompiz wmsendkeys
+* wmmidi_guitar: connect to zynaddsubfx midi input and emulate a guitar (wiimote nunchuk)
+* wmmidi_drums: connect to hydrogen midi input and emulate drums (wiimote nunchuk)
+* wmdummy: do nothing :-P
+
+So i've coded a little module to send key (and complex key shortcut) and dbus message to compiz
+dbus module.
+
+You can use this module to control your desktop during presentations ;-)
+
+Later... a video on youtube of drums and guitar emulations with wiimote custom application...
+I need it... on my GNU/Linux box... NOW!!!
+
+My approach to musical instrument simulations based on wiimote and nunchuk gesture is different from
+the applications I've seen googling around:
+
+I don't want that wonderful...shiny... gui interfaces... wiimote is different user interaction
+we can do it better :-)
+I want a tiny application as platform to rapid experiments on different calibration solutions
+or gesture recognition... I don't want to code a gui... I don't want to code a synthetizer...
+I don't want 40000 code lines of gothic architecture code :-D
+
+I want a 2-line-modular-application to experiment tiny-little-incremental-absolutely-empirical
+gesture recognition for musical instrument simulations (yes... I'm crazy... I0m really crazy ;-)).
+
+The trick is to outsourcing the synthesis phase to real professionals in the area ;-)
+
+* zynaddsubfx (guitar)
+* hydrogen (drums)
+
+Requirements
+------------
+
+* cwiid (and the included python bindings)
+* pyportmidi
+* pycompiz
+* python-xlib
+* zynaddsubfx
+* hydrogen
+* jack
+
+Why
+---
+
+Just 4 fun :-D
