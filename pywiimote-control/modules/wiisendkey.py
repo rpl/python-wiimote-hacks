@@ -42,8 +42,9 @@ def releaseKey(keycode):
         display.sync()
 
 def sendKey(keycode):
+        print("KEYCODE: %s" % keycode)
         Xlib.ext.xtest.fake_input(display,Xlib.X.KeyPress, keycode)
-        display.sync()
+        #display.sync()
         Xlib.ext.xtest.fake_input(display,Xlib.X.KeyRelease, keycode)
         display.sync() 
 
@@ -65,20 +66,36 @@ def CtrlPageDown():
         sendKey(99) #F11
         releaseKey(37)
 
+def ZoomIn():
+        pressKey(37)
+        sendKey(35)
+        releaseKey(37)
+
+def ZoomOut():
+        pressKey(37)
+        sendKey(61)
+        releaseKey(37)
+
+def Home():
+	sendKey(110)
+
+def End():
+        sendKey(115)
+
 def Enter():
 	sendKey(36)
 
 def Up():
-        sendKey(98)
+        sendKey(111)
 
 def Down():
         sendKey(104)
 
 def Left():
-        sendKey(100)
+        sendKey(113)
 
 def Right(): 
-        sendKey(102)
+        sendKey(114)
 
 ########################################
 
@@ -86,14 +103,22 @@ def callback(mesg):
     global NUNCHUK_accY, CHORD, BASE_NOTE
     if mesg[0] == cwiid.MESG_BTN:
         print 'Button Report: %.4X' % mesg[1]
-        if mesg[1] == 0x800: 
+        if mesg[1] == 0x800:
             Up()
+        if mesg[1] == 0x804: 
+            ZoomIn()
         elif mesg[1] == 0x200:
             Right()
         elif mesg[1] == 0x400:
-            Down()
+	    Down()
+        elif mesg[1] == 0x404:
+            ZoomOut()
         elif mesg[1] == 0x100:
             Left()
+        elif mesg[1] == 0x104:
+            Home()
+        elif mesg[1] == 0x204:
+            End()
         elif mesg[1] == 0x4:
             SlideMiniature()
         elif mesg[1] == 0x8:
