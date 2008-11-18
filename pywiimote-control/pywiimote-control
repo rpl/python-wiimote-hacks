@@ -21,14 +21,14 @@ import sys
 
 from modules import *
 
-optional_modules = [wiidummy, wiidesktop, wiimidi_guitar, wiimidi_drums] 
-optional_module_index = 0
-active_modules = [wiidummy]   
+selected_modules = [wiidummy, wiidesktop, wiimidi_guitar, wiimidi_drums] 
+current_module_index = 0
+active_module = wiidummy   
 
 def wiictrl_init (wiimote):
     """ initialize wiimote and wiictrl modules """
-    for module in active_modules:
-        module.init()
+    global active_module
+    active_module.init()
     wiimote.mesg_callback = wiictrl_callback
     wiimote.rpt_mode = cwiid.RPT_BTN ^ cwiid.RPT_ACC ^cwiid.RPT_NUNCHUK
     wiimote.led = cwiid.LED1_ON
@@ -38,40 +38,39 @@ def wiictrl_init (wiimote):
 
 def wiictrl_cycle_modules (wiimote):
     """ """
-    global optional_module_index
-    old_cycle_module = optional_modules[optional_module_index]
-    active_modules.remove(old_cycle_module)
-    old_cycle_module.close()
-    optional_module_index = optional_module_index + 1
+    global current_module_index, active_module
 
-    if optional_module_index == len(optional_modules):
-       optional_module_index = 0
+    active_module.close()
 
-    new_cycle_module = optional_modules[optional_module_index]
-    new_cycle_module.init()
-    active_modules.append(new_cycle_module)
+    if current_module_index < len(selected_modules)-1:
+       current_module_index = current_module_index + 1
+    else:
+       current_module_index = 0
+
+    active_module = selected_modules[current_module_index]
+    active_module.init()
 
     wiimote.led = { 
         0: lambda n : cwiid.LED1_ON,
         1: lambda n : cwiid.LED2_ON,
         2: lambda n : cwiid.LED3_ON,
         3: lambda n : cwiid.LED4_ON
-    }[optional_module_index](0)
+    }[current_module_index](0)
     
 
 def wiictrl_callback (mesg_list):
     """ wiictrl general callback """
+    global active_module
     for mesg in mesg_list:
-        if mesg[0] == cwiid.MESG_BTN:
-            if mesg[1] == 0x80:
+        if mesg[0] == cwiid.MESG_BTN and mesg[1] == cwiid.BTN_HOME:
                wiictrl_cycle_modules(wiimote) 
-        for module in active_modules:
-            module.callback(mesg)
+        
+        active_module.callback(mesg)
 
 def wiictrl_close (wiimote):
     """ close wiimote and wiictrl modules """
-    for module in modules_list:
-        module.close()
+    global active_module
+    active_module.close()
     wiimote.close()
 
 
