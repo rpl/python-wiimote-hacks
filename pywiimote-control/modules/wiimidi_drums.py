@@ -24,23 +24,23 @@ INPUT = 0
 WIIMOTE_chord = 40
 NUNCHUK_chord = 40
 
-WIIMOTE_zeroY = 126
-WIIMOTE_oneY = 151
-NUNCHUK_zeroY = 124
-NUNCHUK_oneY = 177
+WIIMOTE_zeroZ = 126
+WIIMOTE_oneZ = 151
+NUNCHUK_zeroZ = 124
+NUNCHUK_oneZ = 177
 
-NUNCHUK_accY = 0
-WIIMOTE_accY = 0
+NUNCHUK_accZ = 0
+WIIMOTE_accZ = 0
 
 NUNCHUK_value = 0
 WIIMOTE_value = 0
 
-WIIMOTE_offsetY = -17
-NUNCHUK_offsetY = -27
-triggerA = 0
-triggerB = 0
+WIIMOTE_offsetZ = -27
+NUNCHUK_offsetZ = -27
+triggerAccNC = 0
+triggerAccWM = 0
 triggerC = 0
-triggerZ = 1
+triggerZ = 0
 
 MidiOut = None
 
@@ -66,7 +66,6 @@ def close ():
         MidiOut = None
     pass
 
-
 def PrintDevices(InOrOut):
     for loop in range(pypm.CountDevices()):
         interf,name,inp,outp,opened = pypm.GetDeviceInfo(loop)
@@ -80,7 +79,13 @@ def PrintDevices(InOrOut):
     print
 
 def callback(mesg):
-    global MidiOut, WIIMOTE_chord, NUNCHUK_chord, NUNCHUK_value, WIIMOTE_value, NUNCHUK_accY, NUNCHUK_accY, WIIMOTE_accY, WIIMOTE_zeroY, triggerA, triggerB, triggerC, triggerZ
+    global MidiOut, WIIMOTE_chord, NUNCHUK_chord,\
+           NUNCHUK_value, WIIMOTE_value, NUNCHUK_accZ, NUNCHUK_accZ, \
+           WIIMOTE_accZ, WIIMOTE_zeroZ, triggerAccNC, triggerAccWM, triggerC, triggerZ
+    
+    if MidiOut == None:
+       return
+
     if mesg[0] == cwiid.MESG_BTN:
         if mesg[1] == cwiid.BTN_A:
             WIIMOTE_chord = WIIMOTE_chord+1
@@ -90,18 +95,18 @@ def callback(mesg):
 	    pass
 
     elif mesg[0] == cwiid.MESG_ACC:
-        WIIMOTE_accY = mesg[1][cwiid.Y]
-        WIIMOTE_value = (WIIMOTE_accY + WIIMOTE_offsetY - WIIMOTE_zeroY)*2 #*0.717514
-        if triggerB == 0 and WIIMOTE_accY > 130 and WIIMOTE_value > 10:
-#            print "WIIMOTE: accY %s - value %s" % (WIIMOTE_accY, WIIMOTE_value)
-            triggerB = 1
+        WIIMOTE_accZ = mesg[1][cwiid.Z]
+        WIIMOTE_value = (WIIMOTE_accZ + WIIMOTE_offsetZ - WIIMOTE_zeroZ)*0.5
+        if triggerAccWM == 0 and WIIMOTE_accZ > 200 and WIIMOTE_value > 40:
+            #print "WIIMOTE: accZ %s - value %s" % (WIIMOTE_accZ, WIIMOTE_value)
+            triggerAccWM = 1
             MidiOut.WriteShort(0x90,WIIMOTE_chord,100) #int(WIIMOTE_value*3))
-        elif triggerB and (WIIMOTE_value < 10 or WIIMOTE_accY < 120):
-            triggerB = 0
+        elif triggerAccWM and (WIIMOTE_value < 10 or WIIMOTE_accZ < 120):
+            triggerAccWM = 0
                            
     elif mesg[0] == cwiid.MESG_NUNCHUK:
-        NUNCHUK_accY = mesg[1]['acc'][2]
-        NUNCHUK_value = (NUNCHUK_accY + NUNCHUK_offsetY - NUNCHUK_zeroY)*0.5  #*0.717514
+        NUNCHUK_accZ = mesg[1]['acc'][cwiid.Z]
+        NUNCHUK_value = (NUNCHUK_accZ + NUNCHUK_offsetZ - NUNCHUK_zeroZ)*0.5
 	if mesg[1]['buttons'] == cwiid.NUNCHUK_BTN_C and not triggerC:
 	   triggerC = 1
         elif mesg[1]['buttons'] != cwiid.NUNCHUK_BTN_C and triggerC:
@@ -114,9 +119,9 @@ def callback(mesg):
            triggerZ = 0
 
 
-        if triggerA == 0 and NUNCHUK_value > 40 and NUNCHUK_accY > 200:
-            triggerA = 1
+        if triggerAccNC == 0 and NUNCHUK_value > 40 and NUNCHUK_accZ > 200:
+            triggerAccNC = 1
             MidiOut.WriteShort(0x90,NUNCHUK_chord,100) #int(NUNCHUK_value*3))
-#            print "NUNCHUK: accY %s - value %s" % (NUNCHUK_accY, NUNCHUK_value)
+            #print "NUNCHUK: accZ %s - value %s" % (NUNCHUK_accZ, NUNCHUK_value)
         elif NUNCHUK_value < 40:
-            triggerA = 0
+            triggerAccNC = 0

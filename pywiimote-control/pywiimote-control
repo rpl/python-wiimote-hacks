@@ -22,6 +22,8 @@ import sys
 from modules import *
 
 selected_modules = [wiidummy, wiidesktop, wiimidi_guitar, wiimidi_drums] 
+module_led_values = [cwiid.LED1_ON, cwiid.LED2_ON, cwiid.LED3_ON, cwiid.LED4_ON] 
+
 current_module_index = 0
 active_module = wiidummy   
 
@@ -50,13 +52,7 @@ def wiictrl_cycle_modules (wiimote):
     active_module = selected_modules[current_module_index]
     active_module.init()
 
-    wiimote.led = { 
-        0: lambda n : cwiid.LED1_ON,
-        1: lambda n : cwiid.LED2_ON,
-        2: lambda n : cwiid.LED3_ON,
-        3: lambda n : cwiid.LED4_ON
-    }[current_module_index](0)
-    
+    wiimote.led = module_led_values[current_module_index] 
 
 def wiictrl_callback (mesg_list):
     """ wiictrl general callback """

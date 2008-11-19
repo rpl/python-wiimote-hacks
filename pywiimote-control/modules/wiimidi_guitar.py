@@ -24,13 +24,13 @@ INPUT = 0
 CHORD = 40
 BASE_NOTE = 40
 
-WIIMOTE_zeroY = 126
-WIIMOTE_oneY = 151
-NUNCHUK_zeroY = 124
-NUNCHUK_oneY = 177
+NUNCHUK_zeroZ = 124
+NUNCHUK_oneZ = 177
 
-NUNCHUK_accY = 0
-offsetY = -37
+NUNCHUK_accZ = 0
+offsetZ = -37
+
+trigger = 0
 
 MidiOut = None
 
@@ -70,27 +70,32 @@ def PrintDevices(InOrOut):
     print
 
 def callback(mesg):
-    global NUNCHUK_accY, CHORD, BASE_NOTE, MidiOut
+    global trigger, NUNCHUK_accY, CHORD, BASE_NOTE, MidiOut
+
+    if MidiOut == None:
+       return
+
     if mesg[0] == cwiid.MESG_BTN:
-        if mesg[1] == 4:
+        if mesg[1] == cwiid.BTN_B:
             MidiOut.WriteShort(0x80,CHORD,50)
             CHORD = BASE_NOTE
-        elif mesg[1] == 8:
+        elif mesg[1] == cwiid.BTN_A:
             MidiOut.WriteShort(0x80,CHORD,50)
             CHORD = BASE_NOTE+3
-        elif mesg[1] == 0x800:
+        elif mesg[1] == cwiid.BTN_UP:
             BASE_NOTE+=1
-        elif mesg[1] == 0x400:
+        elif mesg[1] == cwiid.BTN_DOWN:
             BASE_NOTE-=1
         else:
             MidiOut.WriteShort(0x80,CHORD,50)
             CHORD = BASE_NOTE-3
     elif mesg[0] == cwiid.MESG_NUNCHUK:
-        NUNCHUK_accY = mesg[1]['acc'][2]
-        value = (NUNCHUK_accY + offsetY - NUNCHUK_zeroY)*0.717514
+        NUNCHUK_accZ = mesg[1]['acc'][cwiid.Z]
+        value = (NUNCHUK_accZ + offsetZ - NUNCHUK_zeroZ)*0.717514
         if value > 30:
             trigger = 1
             MidiOut.WriteShort(0x80,CHORD,50)
             MidiOut.WriteShort(0x90,CHORD,int(value))
         else:
+            trigger = 0
             MidiOut.WriteShort(0x80,CHORD,50)

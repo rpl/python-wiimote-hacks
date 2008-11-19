@@ -22,16 +22,14 @@ from Xlib import X
 from Xlib.protocol import event
 import time
 
+display = Display()
+
 def init():
     pass
 
 def close ():
     """ """
     pass
-
-
-display = Display()
-
 
 def pressKey(keycode):
         Xlib.ext.xtest.fake_input(display,Xlib.X.KeyPress, keycode)
@@ -103,25 +101,25 @@ def callback(mesg):
     global NUNCHUK_accY, CHORD, BASE_NOTE
     if mesg[0] == cwiid.MESG_BTN:
         print 'Button Report: %.4X' % mesg[1]
-        if mesg[1] == 0x800:
+        if mesg[1] == cwiid.BTN_UP:
             Up()
-        if mesg[1] == 0x804: 
+        if mesg[1] == cwiid.BTN_B ^ cwiid.BTN_UP: 
             ZoomIn()
-        elif mesg[1] == 0x200:
+        elif mesg[1] == cwiid.BTN_RIGHT:
             Right()
-        elif mesg[1] == 0x400:
+        elif mesg[1] == cwiid.BTN_DOWN:
 	    Down()
-        elif mesg[1] == 0x404:
+        elif mesg[1] == cwiid.BTN_B ^ cwiid.BTN_DOWN:
             ZoomOut()
-        elif mesg[1] == 0x100:
+        elif mesg[1] == cwiid.BTN_LEFT:
             Left()
-        elif mesg[1] == 0x104:
+        elif mesg[1] == cwiid.BTN_B ^ cwiid.BTN_LEFT:
             Home()
-        elif mesg[1] == 0x204:
+        elif mesg[1] == cwiid.BTN_B ^ cwiid.BTN_RIGHT:
             End()
-        elif mesg[1] == 0x4:
+        elif mesg[1] == cwiid.BTN_B:
             SlideMiniature()
-        elif mesg[1] == 0x8:
+        elif mesg[1] == cwiid.BTN_A:
             Enter()
 
 
